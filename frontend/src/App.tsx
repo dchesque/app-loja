@@ -2,21 +2,19 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// Removendo a importação não utilizada de useAuth
 import { AuthProvider } from './store/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
-// Vamos ajustar o caminho para o LoginPage se ele estiver em outro local
-import LoginPage from './pages/Auth/LoginPage'; // Alterado para o caminho correto
+import LoginPage from './pages/Auth/LoginPage';
 import Dashboard from './pages/Dashboard';
 import ListaClientes from './pages/Clientes/ListaClientes';
 import FormCliente from './pages/Clientes/FormCliente';
+import ListaFornecedores from './pages/Fornecedores/ListaFornecedores';
+import FormFornecedor from './pages/Fornecedores/FormFornecedor';
+import VisualizarFornecedores from './pages/Fornecedores/VisualizarFornecedores';
 import NaoEncontrado from './pages/NaoEncontrado';
 import AcessoNegado from './pages/AcessoNegado';
-
-// Removendo a importação não utilizada do UserRole
-// import { UserRole } from './services/authService';
 
 const App: React.FC = () => {
   return (
@@ -61,6 +59,40 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <FormCliente />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rotas de Fornecedores */}
+          <Route
+            path="/fornecedores"
+            element={
+              <ProtectedRoute>
+                <ListaFornecedores />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fornecedores/novo"
+            element={
+              <ProtectedRoute>
+                <FormFornecedor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fornecedores/:id"
+            element={
+              <ProtectedRoute>
+                <FormFornecedor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fornecedores/visualizar/:id"
+            element={
+              <ProtectedRoute>
+                <VisualizarFornecedores />
               </ProtectedRoute>
             }
           />

@@ -30,12 +30,7 @@ export interface Fornecedor {
 
 // Schema de validação para criação de fornecedor
 export const createFornecedorSchema = Joi.object({
-  codigo: Joi.string()
-    .required()
-    .messages({
-      'any.required': 'Código é obrigatório',
-      'string.empty': 'Código não pode ser vazio'
-    }),
+  codigo: Joi.string().allow('', null), // Agora é opcional
   razao_social: Joi.string()
     .required()
     .messages({

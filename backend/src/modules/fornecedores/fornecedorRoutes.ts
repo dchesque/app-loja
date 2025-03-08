@@ -2,6 +2,8 @@ import { Router } from 'express';
 import FornecedorController from './fornecedorController';
 import { authenticate, authorize } from '../../middleware/authMiddleware';
 import { UserRole } from '../auth/UserModel';
+import { validateQuery } from '../../middleware/validator';
+import { fornecedorQuerySchema } from './FornecedorModel';
 
 const router = Router();
 
@@ -11,6 +13,7 @@ router.use(authenticate);
 // Rota para listar todos os fornecedores
 router.get(
   '/',
+  validateQuery(fornecedorQuerySchema),
   FornecedorController.findAll
 );
 
@@ -25,6 +28,7 @@ router.get(
 router.post(
   '/',
   authorize([UserRole.ADMIN, UserRole.MASTER_ADMIN]),
+  // A validação é feita dentro do controller
   FornecedorController.create
 );
 
@@ -33,6 +37,7 @@ router.post(
 router.put(
   '/:id',
   authorize([UserRole.ADMIN, UserRole.MASTER_ADMIN]),
+  // A validação é feita dentro do controller
   FornecedorController.update
 );
 

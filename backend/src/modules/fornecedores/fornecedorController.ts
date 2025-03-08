@@ -26,35 +26,64 @@ class FornecedorController {
    *       409:
    *         description: Fornecedor já existe com este CNPJ ou código
    */
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      logger.info('Endpoint de criação de fornecedor acessado');
-      // Validação manual do corpo da requisição
-      const { error } = createFornecedorSchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true
-      });
+// src/modules/fornecedores/fornecedorController.ts
+// No método create, antes de inserir o fornecedor no banco
 
-      if (error) {
-        const errorMessage = error.details
-          .map((detail) => detail.message)
-          .join(', ');
-        
-        throw new AppError(errorMessage, 400);
-      }
+async create(req: Request, res: Response, next: NextFunction) {
+  try {
+    logger.info('Endpoint de criação de fornecedor acessado');
+    // Validação manual do corpo da requisição
+    const { error } = createFornecedorSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true
+    });
 
-      const fornecedorData: Fornecedor = req.body;
+    if (error) {
+      const errorMessage = error.details
+        .map((detail) => detail.message)
+        .join(', ');
       
-      // Verificar se já existe um fornecedor com o mesmo CNPJ
-      const { data: existingFornecedorByCnpj } = await supabaseService.select('fornecedores', '*', {
-        filters: { cnpj: fornecedorData.cnpj }
+      throw new AppError(errorMessage, 400);
+    }
+
+    const fornecedorData: Fornecedor = req.body;
+    
+    // Se o código não foi fornecido pelo usuário, vamos gerar automaticamente
+    if (!fornecedorData.codigo || fornecedorData.codigo.trim() === '') {
+      // Buscar o último código para gerar o próximo
+      const { data: lastFornecedor } = await supabaseService.select('fornecedores', 'codigo', {
+        order: { column: 'codigo', ascending: false },
+        pagination: { page: 1, pageSize: 1 }
       });
-
-      if (existingFornecedorByCnpj && existingFornecedorByCnpj.length > 0) {
-        throw new AppError('Fornecedor já existe com este CNPJ', 409);
+      
+      let nextCode = 1;
+      
+      // Se existir um fornecedor anterior, extrair o número e incrementar
+      if (lastFornecedor && lastFornecedor.length > 0 && lastFornecedor[0].codigo) {
+        // Assumindo que o código está no formato "F0001"
+        const lastCodeMatch = lastFornecedor[0].codigo.match(/\d+/);
+        if (lastCodeMatch) {
+          nextCode = parseInt(lastCodeMatch[0]) + 1;
+        }
       }
+      
+      // Formatar o código com zeros à esquerda (ex: F0001)
+      fornecedorData.codigo = `F${nextCode.toString().padStart(4, '0')}`;
+      
+      logger.info(`Código gerado automaticamente: ${fornecedorData.codigo}`);
+    }
+    
+    // Verificar se já existe um fornecedor com o mesmo CNPJ
+    const { data: existingFornecedorByCnpj } = await supabaseService.select('fornecedores', '*', {
+      filters: { cnpj: fornecedorData.cnpj }
+    });
 
-      // Verificar se já existe um fornecedor com o mesmo código
+    if (existingFornecedorByCnpj && existingFornecedorByCnpj.length > 0) {
+      throw new AppError('Fornecedor já existe com este CNPJ', 409);
+    }
+
+    // Verificar se já existe um fornecedor com o mesmo código (caso tenha sido informado pelo usuário)
+    if (fornecedorData.codigo) {
       const { data: existingFornecedorByCodigo } = await supabaseService.select('fornecedores', '*', {
         filters: { codigo: fornecedorData.codigo }
       });
@@ -62,25 +91,26 @@ class FornecedorController {
       if (existingFornecedorByCodigo && existingFornecedorByCodigo.length > 0) {
         throw new AppError('Fornecedor já existe com este código', 409);
       }
-
-      // Adicionar informações de criação
-      const newFornecedor = {
-        ...fornecedorData,
-        created_at: new Date(),
-        created_by: req.user?.id
-      };
-
-      // Inserir o fornecedor no banco de dados
-      const fornecedor = await supabaseService.insert('fornecedores', newFornecedor);
-
-      res.status(201).json({
-        success: true,
-        data: fornecedor[0]
-      });
-    } catch (error) {
-      next(error);
     }
+
+    // Adicionar informações de criação
+    const newFornecedor = {
+      ...fornecedorData,
+      created_at: new Date(),
+      created_by: req.user?.id
+    };
+
+    // Inserir o fornecedor no banco de dados
+    const fornecedor = await supabaseService.insert('fornecedores', newFornecedor);
+
+    res.status(201).json({
+      success: true,
+      data: fornecedor[0]
+    });
+  } catch (error) {
+    next(error);
   }
+}
 
   /**
    * @swagger

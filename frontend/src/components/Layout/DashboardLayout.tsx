@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
+
 
 // ícones (você pode importar de bibliotecas como @heroicons/react)
 const DashboardIcon = () => (
@@ -69,6 +70,30 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // ADICIONE ESTAS DUAS LINHAS AQUI:
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // ADICIONE ESTE useEffect LOGO APÓS:
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current && 
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
 
   const mainMenuItems: (MenuItem | SubMenu)[] = [
     {
@@ -154,9 +179,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         } bg-white shadow-md transition-all duration-300 ease-in-out`}
       >
         <div className="flex items-center justify-between p-4 border-b">
-          <div className={`${isSidebarOpen ? 'block' : 'hidden'} text-xl font-bold text-primary-600`}>
-            LOJA
-          </div>
+        <img 
+  src="/logo-site.png" 
+  alt="Gestão JC PLUS SIZE" 
+  className="max-h-8 max-w-40 object-contain" // Limita altura e largura máxima
+/>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-md hover:bg-gray-100 focus:outline-none"
@@ -251,30 +278,33 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 )?.name || 'Dashboard'}
               </h1>
             </div>
-            <div className="flex items-center">
-              <div className="relative">
-                <button
-                  className="flex items-center focus:outline-none"
-                  onClick={() => {}}
-                >
-                  <div className="mr-3 text-right">
-                    <p className="text-sm font-semibold">{user?.name}</p>
-                    <p className="text-xs text-gray-500">{user?.role}</p>
-                  </div>
-                  <div className="h-8 w-8 rounded-full bg-primary-500 text-white flex items-center justify-center">
-                    {user?.name.charAt(0)}
-                  </div>
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Sair
-                  </button>
-                </div>
-              </div>
-            </div>
+            <div className="relative" ref={profileMenuRef}>
+    <button
+      className="flex items-center focus:outline-none"
+      onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+    >
+      <div className="mr-3 text-right">
+        <p className="text-sm font-semibold">{user?.name}</p>
+        <p className="text-xs text-gray-500">{user?.role}</p>
+      </div>
+      <div className="h-8 w-8 rounded-full bg-primary-500 text-white flex items-center justify-center">
+        {user?.name.charAt(0)}
+      </div>
+    </button>
+    {isProfileMenuOpen && (
+      <div 
+        className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1"
+      >
+        <button
+          onClick={handleLogout}
+          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Sair
+        </button>
+      </div>
+    )}
+  </div>
+
           </div>
         </header>
 

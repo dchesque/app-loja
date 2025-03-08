@@ -55,13 +55,19 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">LOJA</h2>
+          {/* Add this block right here */}
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/logo-site.png" 
+              alt="Gestão JC PLUS SIZE" 
+              className="max-w-full h-12"
+            />
+          </div>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sistema de Gestão Empresarial
+            Sistema de Gestão Empresarial JC PLUS SIZE
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>          <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
                 E-mail
@@ -139,7 +145,7 @@ const LoginPage: React.FC = () => {
 
         <div className="mt-6">
           <p className="text-center text-sm text-gray-600">
-            &copy; {new Date().getFullYear()} LOJA. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} JC PLUS SIZE. Todos os direitos reservados.
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# Sistema de Gestão Empresarial LOJA
+# Gestão JC PLUS SIZE - Sistema de Gestão Empresarial
 
 Sistema de gestão empresarial completo com módulos para gerenciamento de vendas, clientes, fornecedores, funcionários e financeiro.
 
